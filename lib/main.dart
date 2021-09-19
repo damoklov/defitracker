@@ -109,8 +109,24 @@ class _HomePageState extends State<HomePage> {
           );
         },
         itemBuilder: (BuildContext _context, int i) {
-          return _buildRow(userTokens[i]);
-        }
+          final token = userTokens[i];
+          return Dismissible(
+              child: _buildRow(userTokens[i]),
+              key: Key(userTokens[i]),
+              background: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF272635),
+                    borderRadius: BorderRadius.all(Radius.circular(20.0))
+                  )
+              ),
+
+              onDismissed: (direction) {
+                setState(() {
+                userTokens.removeAt(i);
+              });
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$token removed')));
+          });
+        },
     );
   }
 
