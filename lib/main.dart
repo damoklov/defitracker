@@ -10,7 +10,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('DeFi Tracker'),
+          title: const Text(
+              'DeFi Tracker',
+              style: TextStyle(fontSize: 24)),
+          backgroundColor: const Color(0xFF3A7CA5),
         ),
         body: const Center(
           child: HomePage(),
@@ -29,7 +32,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _textFieldController = TextEditingController();
-  final _biggerFont = const TextStyle(fontSize: 18);
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
     return showDialog(
@@ -84,7 +86,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold (
+      backgroundColor: const Color(0xFF272635),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF3A7CA5),
         icon: const Icon(Icons.add),
         onPressed: () {
           _displayTextInputDialog(context);
@@ -96,9 +100,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTokens() {
-    return ListView.builder(
+    return ListView.separated(
         itemCount: userTokens.length,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
+        separatorBuilder: (BuildContext context, int index) {
+          return const SizedBox(
+            height: 10,
+          );
+        },
         itemBuilder: (BuildContext _context, int i) {
           return _buildRow(userTokens[i]);
         }
@@ -109,8 +118,13 @@ class _HomePageState extends State<HomePage> {
     return ListTile(
       title: Text(
         token,
-        style: _biggerFont,
+        style: const TextStyle(color: Colors.white, fontSize: 18),
       ),
+      tileColor: const Color(0xFF9B1D20),
+      leading: const Icon(Icons.attach_money),
+      dense: true,
+      minLeadingWidth: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
     );
   }
 }
