@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Cancel'),
                 onPressed: () {
                   setState(() {
+                    _textFieldController.clear();
                     Navigator.pop(context);
                   });
                 },
@@ -68,8 +69,7 @@ class _HomePageState extends State<HomePage> {
                     userTokens.add(valueText);
                   }
                   setState(() {
-                    valueText = "";
-                    codeDialog = "";
+                    _textFieldController.clear();
                     Navigator.pop(context);
                   });
                 },
