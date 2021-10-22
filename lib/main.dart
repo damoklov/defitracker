@@ -1,130 +1,146 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
-// #docregion MyApp
 class MyApp extends StatelessWidget {
-  // #docregion build
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Startup Name Generator',
-      theme: ThemeData(
-        primaryColor: Colors.white,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+              'DeFi Tracker',
+              style: TextStyle(fontSize: 24)),
+          backgroundColor: const Color(0xFF3A7CA5),
+        ),
+        body: const Center(
+          child: HomePage(),
+        ),
       ),
-      home: RandomWords(),
     );
   }
-// #enddocregion build
 }
-// #enddocregion MyApp
 
-// #docregion RWS-var
-class _RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _saved = <WordPair>{};
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-  // #enddocregion RWS-var
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
-  // #docregion _buildSuggestions
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          if (i.isOdd) return const Divider(); /*2*/
+  @override
+  _HomePageState createState() => _HomePageState();
+}
 
-          final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
-          }
-          return _buildRow(_suggestions[index]);
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _textFieldController = TextEditingController();
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Enter Token Ticker'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  valueText = value;
+                });
+              },
+              controller: _textFieldController,
+              decoration: const InputDecoration(hintText: "\$TICKER"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                child: const Text('Cancel'),
+                onPressed: () {
+                  setState(() {
+                    _textFieldController.clear();
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+              FlatButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: const Text('OK'),
+                onPressed: () {
+                  if (valueText != "") {
+                    userTokens.add(valueText);
+                  }
+                  setState(() {
+                    _textFieldController.clear();
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
         });
   }
-  // #enddocregion _buildSuggestions
 
-  // #docregion _buildRow
-  Widget _buildRow(WordPair pair) {
-    final alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-        semanticLabel: alreadySaved ? 'Remove from saved' : 'Save',
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
-    );
-  }
-  // #enddocregion _buildRow
+  late String codeDialog;
+  late String valueText;
+  List<String> userTokens = [];
 
-  // #docregion RWS-build
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Startup Name Generator'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: _pushSaved,
-            tooltip: 'Saved Suggestions',
-          ),
-        ],
+    return Scaffold (
+      backgroundColor: const Color(0xFF272635),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF3A7CA5),
+        icon: const Icon(Icons.add),
+        onPressed: () {
+          _displayTextInputDialog(context);
+        },
+        label: const Text('Token'),
       ),
-      body: _buildSuggestions(),
+      body: _buildTokens(),
     );
   }
-  // #enddocregion RWS-build
 
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        // NEW lines from here...
-        builder: (context) {
-          final tiles = _saved.map(
-                (pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-              );
-            },
+  Widget _buildTokens() {
+    return ListView.separated(
+        itemCount: userTokens.length,
+        padding: const EdgeInsets.all(10),
+        separatorBuilder: (BuildContext context, int index) {
+          return const SizedBox(
+            height: 10,
           );
-          final divided = tiles.isNotEmpty
-              ? ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList()
-              : <Widget>[];
+        },
+        itemBuilder: (BuildContext _context, int i) {
+          final token = userTokens[i];
+          return Dismissible(
+              child: _buildRow(userTokens[i]),
+              key: Key(userTokens[i]),
+              background: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF272635),
+                    borderRadius: BorderRadius.all(Radius.circular(20.0))
+                  )
+              ),
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Saved Suggestions'),
-            ),
-            body: ListView(children: divided),
-          );
-        }, //...to here.
-      ),
+              onDismissed: (direction) {
+                setState(() {
+                userTokens.removeAt(i);
+              });
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$token removed')));
+          });
+        },
     );
   }
-// #docregion RWS-var
-}
-// #enddocregion RWS-var
 
-class RandomWords extends StatefulWidget {
-  @override
-  State<RandomWords> createState() => _RandomWordsState();
+  Widget _buildRow(String token) {
+    return ListTile(
+      title: Text(
+        token,
+        style: const TextStyle(color: Colors.white, fontSize: 18),
+      ),
+      tileColor: const Color(0xFF9B1D20),
+      leading: const Icon(Icons.attach_money),
+      dense: true,
+      minLeadingWidth: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+    );
+  }
 }
